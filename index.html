@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Text Adventure Game</title>
+    <style>
+
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            /* 添加遊戲背景圖片 */
+            background-image: url("https://tw.cyberlink.com/prog/learning-center/html/1477/Phd10-7-Replace-a-Washed-Out-Sky/img/sky.jpg");
+            background-size: cover;
+            background-position: center;
+    background-repeat: no-repeat; /* 禁止背景圖片重複 */
+    background-attachment: fixed; /* 背景圖片固定，不隨頁面滾動 */
+    height: 100vh; /* 限制body的高度為視窗高度 */
+
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px; /* 添加圓角效果 */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* 添加陰影效果 */
+    transition: background-color 0.3s ease-in-out; /* 添加按鈕漸變效果 */
+}
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+/* 增加動畫效果 */
+@keyframes fadeInOut {
+    0% {
+        opacity: 0;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+        #game-options, #status, #highest-exp-list, #chat-box, #highest-coins-list {
+            margin-top: 20px;
+            border: 1px solid #ccc;
+            padding: 10px;
+        }
+
+        #game-options, #status {
+            display: none;
+        }
+
+        ul {
+            padding-left: 20px;
+        }
+
+        ul li {
+            list-style-type: circle;
+            margin-bottom: 5px;
+        }
+
+        #restart-button {
+            margin-top: 10px;
+        }
+
+        #chat-box p {
+    /* 添加動畫效果 */
+    animation: fadeInOut 2s infinite;
+    animation-delay: 1s;
+    background-color: white;
+            margin: 5px 0;
+        }
+
+        #highest-exp-list, #highest-coins-list {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        #highest-exp-list li, #highest-coins-list li {
+            margin-bottom: 5px;
+        }
+
+        #clear-leaderboard-button {
+            margin-top: 10px;
+            background-color: #f44336;
+        }
+
+        #clear-leaderboard-button:hover {
+            background-color: #d32f2f;
+        }
+        #personal-status {
+            border: 1px solid #ccc;
+            padding: 10px;
+            position: sticky;
+            top: 0;
+            background-color: #f9f9f9;
+        }
+#options-list li {
+    margin-bottom: 10px;
+}
+
+#options-list button {
+    margin-right: 10px;
+}
+#chat-box p {
+    margin: 5px 0;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 5px;
+}
+
+#chat-box p:last-child {
+    border-bottom: none;
+}
+#highest-exp-list, #highest-coins-list {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+#highest-exp-list li, #highest-coins-list li {
+    margin-bottom: 10px;
+    padding: 5px;
+    background-color: #f9f9f9;
+    border: 1px solid #ccc;
+}
+
+#highest-exp-list li:nth-child(odd), #highest-coins-list li:nth-child(odd) {
+    background-color: #f0f0f0;
+}
+
+#highest-exp-list li span, #highest-coins-list li span {
+    font-weight: bold;
+}
+
+#highest-exp-list li span {
+    color: #007bff;
+}
+
+#highest-coins-list li span {
+    color: #28a745;
+}
+#restart-button, #clear-leaderboard-button {
+    padding: 8px 16px;
+    font-size: 14px;
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+#restart-button:hover, #clear-leaderboard-button:hover {
+    background-color: #c82333;
+}
+
+    </style>
+</head>
+<body>
+    <h1>歡迎來到冒險世界！</h1>
+    <p>請輸入你的名字：</p>
+    <input type="text" id="player-name" />
+    <button onclick="startGame()">開始遊戲</button>
+    <div id="game-options">
+        <h2>遊戲進行中...</h2>
+        <p>請選擇一個冒險選項：</p>
+        <ul id="options-list"></ul>
+    </div>
+    <button id="restart-button" style="display: none;" onclick="restartGame()">重新開始遊戲</button>
+    <div id="chat-box">
+        <!-- 遊戲進程和結果將顯示在這裡 -->
+    </div>
+    <div id="personal-status">
+
+        <h3>狀態欄</h3>
+        <p>玩家名字： <span id="player-name-display"></span></p>
+        <p>生命值： <span id="player-health"></span></p>
+        <p>金幣數量： <span id="player-coins"></span></p>
+        <p>經驗值： <span id="player-exp"></span></p>
+    </div>
+    <h2>排行榜</h2>
+    <h3>經驗值 Top 5</h3>
+    <ul id="highest-exp-list">
+        <!-- 最高經驗值排行榜內容將在遊戲結束時動態生成 -->
+    </ul>
+    <h3>金幣數 Top 5</h3>
+    <ul id="highest-coins-list">
+        <!-- 最高金幣數量排行榜內容將在遊戲結束時動態生成 -->
+    </ul>
+    <button id="clear-leaderboard-button" onclick="clearLeaderboard()">清除排行榜</button>
+
+    <script>
+        // JavaScript程式碼
+        const playerNameInput = document.getElementById('player-name');
+        const gameOptionsDiv = document.getElementById('game-options');
+        const optionsList = document.getElementById('options-list');
+        const chatBox = document.getElementById('chat-box');
+        const playerHealthSpan = document.getElementById('player-health');
+        const playerCoinsSpan = document.getElementById('player-coins');
+        const playerExpSpan = document.getElementById('player-exp');
+
+        // 初始化遊戲設定
+        let playerHealth = 100;
+        let playerCoins = 0;
+        let playerExp = 0;
+        let highestExp = 0;
+        let highestCoins = 0;
+        let leaderboard = [];
+
+
+        // 遊戲選項
+        const adventureOptions = [
+
+  { option: "山賊埋伏", healthChange: -35, coinsChange: 0, expChange: 0 },
+  { option: "詛咒遺物", healthChange: -50, coinsChange: 0, expChange: 0 },
+  { option: "神秘洞窟", healthChange: -20, coinsChange: 10, expChange: 5 },
+  { option: "古老寺廟", healthChange: -10, coinsChange: 5, expChange: 10 },
+  { option: "荒野狼群", healthChange: -45, coinsChange: 0, expChange: 0 },
+  { option: "魔法泉水", healthChange: 20, coinsChange: 0, expChange: 0 },
+  { option: "幽暗森林", healthChange: -30, coinsChange: 5, expChange: 0 },
+  { option: "失落遺跡", healthChange: -25, coinsChange: 10, expChange: 15 },
+  { option: "山間瀑布", healthChange: 15, coinsChange: 0, expChange: 5 },
+  { option: "奇幻迷宮", healthChange: -40, coinsChange: 5, expChange: 10 },
+  { option: "神聖寶藏", healthChange: -15, coinsChange: 20, expChange: 10 },
+  { option: "古代船墓", healthChange: -30, coinsChange: 0, expChange: 20 },
+  { option: "魔法香園", healthChange: 10, coinsChange: 0, expChange: 5 },
+  { option: "巨人山谷", healthChange: -50, coinsChange: 0, expChange: 10 },
+  { option: "龍之秘境", healthChange: -60, coinsChange: 50, expChange: 30 },
+  { option: "魔法陷阱", healthChange: -25, coinsChange: 0, expChange: 0 },
+  { option: "沼澤巨獸", healthChange: -40, coinsChange: 0, expChange: 0 },
+  { option: "機關迷城", healthChange: -30, coinsChange: 10, expChange: 15 },
+  { option: "冰霜巨熊", healthChange: -50, coinsChange: 5, expChange: 0 },
+  { option: "煙霧迷霧", healthChange: -20, coinsChange: 0, expChange: 5 },
+  { option: "迷失之鎮", healthChange: -10, coinsChange: 15, expChange: 10 },
+  { option: "死亡沙漠", healthChange: -35, coinsChange: 0, expChange: 0 },
+  { option: "隱藏寶藏", healthChange: 0, coinsChange: 30, expChange: 20 },
+  { option: "炙熱火山", healthChange: -55, coinsChange: 0, expChange: 0 },
+  { option: "飛龍獵人", healthChange: -40, coinsChange: 10, expChange: 10 },
+  { option: "失落航船", healthChange: -30, coinsChange: 20, expChange: 5 },
+  { option: "煉獄地獄", healthChange: -70, coinsChange: 0, expChange: 15 },
+  { option: "星塵祭壇", healthChange: 10, coinsChange: 0, expChange: 5 },
+  { option: "魔法寶庫", healthChange: -25, coinsChange: 15, expChange: 10 },
+  { option: "瘟疫墳場", healthChange: -20, coinsChange: 5, expChange: 0 },
+  { option: "不死試煉", healthChange: -50, coinsChange: 0, expChange: 15 },
+  { option: "迷幻之霧", healthChange: -30, coinsChange: 0, expChange: 10 },
+  { option: "夢魘領域", healthChange: -40, coinsChange: 10, expChange: 5 },
+  { option: "天使聖殿", healthChange: -15, coinsChange: 0, expChange: 20 },
+  { option: "地獄火湖", healthChange: -55, coinsChange: 0, expChange: 0 },
+  { option: "聖靈聚會", healthChange: 15, coinsChange: 0, expChange: 10 },
+  { option: "隱藏寺院", healthChange: -20, coinsChange: 10, expChange: 5 },
+  { option: "幽暗煉獄", healthChange: -60, coinsChange: 0, expChange: 0 },
+  { option: "煙霧之森", healthChange: -25, coinsChange: 5, expChange: 15 },
+  { option: "隱藏寶藏", healthChange: 0, coinsChange: 30, expChange: 20 },
+  { option: "妖精之泉", healthChange: 20, coinsChange: 0, expChange: 5 },
+  { option: "幽靈城堡", healthChange: -30, coinsChange: 5, expChange: 10 },
+  { option: "深淵黑洞", healthChange: -45, coinsChange: 0, expChange: 0 },
+  { option: "魔法禁區", healthChange: -20, coinsChange: 5, expChange: 0 },
+  { option: "綠洲綺麗", healthChange: 15, coinsChange: 0, expChange: 5 },
+  { option: "無盡回廊", healthChange: -40, coinsChange: 0, expChange: 0 },
+  { option: "寶藏山洞", healthChange: -10, coinsChange: 5, expChange: 10 },
+  { option: "時光之門", healthChange: -35, coinsChange: 0, expChange: 0 },
+  { option: "奇幻迷宮", healthChange: -30, coinsChange: 5, expChange: 15 },
+  { option: "水晶魔塔", healthChange: -25, coinsChange: 10, expChange: 20 },
+  { option: "炙熱沙漠", healthChange: -55, coinsChange: 0, expChange: 0 },
+  { option: "草原野獸", healthChange: -40, coinsChange: 10, expChange: 5 },
+  { option: "神秘巨人", healthChange: -50, coinsChange: 0, expChange: 10 },
+  { option: "幻想之島", healthChange: -15, coinsChange: 20, expChange: 5 },
+  { option: "魔法之石", healthChange: -20, coinsChange: 5, expChange: 0 },
+  { option: "幻想仙境", healthChange: -25, coinsChange: 15, expChange: 10 },
+  { option: "噩夢之門", healthChange: -40, coinsChange: 0, expChange: 0 },
+  { option: "水晶之洞", healthChange: 10, coinsChange: 0, expChange: 5 },
+  { option: "暗黑地牢", healthChange: -55, coinsChange: 0, expChange: 0 },
+  { option: "魔法寶石", healthChange: -30, coinsChange: 5, expChange: 10 },
+  { option: "禁忌咒語", healthChange: -20, coinsChange: 0, expChange: 15 },
+  { option: "聖光之泉", healthChange: 20, coinsChange: 0, expChange: 0 },
+  { option: "奇幻森林", healthChange: -35, coinsChange: 10, expChange: 5 },
+  { option: "冰冷洞窟", healthChange: -45, coinsChange: 0, expChange: 0 },
+  { option: "古代遺跡", healthChange: -30, coinsChange: 15, expChange: 10 },
+  { option: "天空之城", healthChange: 10, coinsChange: 0, expChange: 5 },
+  { option: "靈魂迷宮", healthChange: -40, coinsChange: 0, expChange: 0 },
+  { option: "龍之寶庫", healthChange: -50, coinsChange: 20, expChange: 15 },
+  { option: "失落遺址", healthChange: -25, coinsChange: 5, expChange: 0 },
+  { option: "奇幻之境", healthChange: -15, coinsChange: 10, expChange: 5 },
+  { option: "魔法瀑布", healthChange: 15, coinsChange: 0, expChange: 0 },
+  { option: "暗影森林", healthChange: -30, coinsChange: 0, expChange: 5 },
+  { option: "妖精迷境", healthChange: -20, coinsChange: 10, expChange: 0 },
+  { option: "奧秘神殿", healthChange: -45, coinsChange: 0, expChange: 0 },
+  { option: "聖光之庭", healthChange: 20, coinsChange: 0, expChange: 0 },
+  { option: "幻境之旅", healthChange: -35, coinsChange: 5, expChange: 10 },
+  { option: "燃燒之地", healthChange: -50, coinsChange: 0, expChange: 5 },
+  { option: "迷失墓園", healthChange: -25, coinsChange: 10, expChange: 15 },
+  { option: "幻想之泉", healthChange: -15, coinsChange: 0, expChange: 20 },
+  { option: "魔法迷宮", healthChange: -55, coinsChange: 0, expChange: 0 },
+  { option: "星光仙境", healthChange: 10, coinsChange: 5, expChange: 0 },
+  { option: "冰霜之地", healthChange: -30, coinsChange: 0, expChange: 10 },
+  { option: "聖光禁區", healthChange: -40, coinsChange: 0, expChange: 0 },
+  { option: "幽暗煉獄", healthChange: -25, coinsChange: 15, expChange: 10 },
+  { option: "夢幻泡泡", healthChange: -20, coinsChange: 0, expChange: 5 },
+  { option: "神秘聖殿", healthChange: 20, coinsChange: 0, expChange: 0 },
+  { option: "幽靈之森", healthChange: -35, coinsChange: 10, expChange: 5 },
+  { option: "魔法之門", healthChange: -45, coinsChange: 0, expChange: 0 },
+  { option: "失落秘境", healthChange: -30, coinsChange: 5, expChange: 10 },
+  { option: "水晶奇谷", healthChange: 10, coinsChange: 0, expChange: 5 },
+  { option: "暗影迷霧", healthChange: -40, coinsChange: 0, expChange: 0 },
+  { option: "煉獄之地", healthChange: -50, coinsChange: 20, expChange: 15 },
+  { option: "魔法隱匿", healthChange: -25, coinsChange: 5, expChange: 0 },
+  { option: "妖精森林", healthChange: -15, coinsChange: 10, expChange: 5 },
+  { option: "幻想瀑布", healthChange: 15, coinsChange: 0, expChange: 0 },
+  { option: "失落之境", healthChange: -30, coinsChange: 0, expChange: 5 },
+  { option: "魔法守衛", healthChange: -20, coinsChange: 10, expChange: 0 },
+  { option: "神秘暗湖", healthChange: -45, coinsChange: 0, expChange: 0 },
+  { option: "聖光之門", healthChange: 20, coinsChange: 0, expChange: 0 },
+  { option: "奇幻禁地", healthChange: -35, coinsChange: 5, expChange: 10 },
+  { option: "燃燒聖地", healthChange: -50, coinsChange: 0, expChange: 5 },
+  { option: "迷失之源", healthChange: -25, coinsChange: 15, expChange: 10 },
+  { option: "幻境仙境", healthChange: -15, coinsChange: 0, expChange: 20 },
+  { option: "神秘迷宮", healthChange: -55, coinsChange: 0, expChange: 0 },
+  { option: "星光森林", healthChange: 10, coinsChange: 5, expChange: 0 },
+  { option: "冰雪荒原", healthChange: -30, coinsChange: 0, expChange: 10 },
+  { option: "聖光秘境", healthChange: -40, coinsChange: 0, expChange: 0 },
+  { option: "幽靈煉獄", healthChange: -25, coinsChange: 15, expChange: 10 },
+  { option: "夢幻之門", healthChange: -20, coinsChange: 0, expChange: 5 },
+  { option: "神秘神殿", healthChange: 20, coinsChange: 0, expChange: 0 },
+
+
+
+
+
+            // 其他冒險選項
+        ];
+
+        // 開始遊戲
+        function startGame() {
+            const playerName = playerNameInput.value;
+            document.getElementById('player-name-display').textContent = playerName;
+            playerNameInput.disabled = true;
+            gameOptionsDiv.style.display = 'none';
+            chatBox.innerHTML = '';
+            playerHealth = 100;
+            playerCoins = 0;
+            playerExp = 0;
+            updateStatus();
+            gameLoop();
+        }
+
+        // 遊戲主迴圈
+        function gameLoop() {
+            if (playerHealth > 0) {
+                // 隨機選取一個事件
+                const eventIndex = Math.floor(Math.random() * adventureOptions.length);
+                const selectedOption = adventureOptions[eventIndex];
+
+                const message = `你遇到了${selectedOption.option}。`;
+                playerHealth += selectedOption.healthChange;
+                playerCoins += selectedOption.coinsChange;
+                playerExp += selectedOption.expChange;
+
+                let resultMessage = '';
+
+                // 根據選項結果產生不同訊息
+                if (selectedOption.healthChange < 0) {
+                    resultMessage += `你失去了${Math.abs(selectedOption.healthChange)}生命值。`;
+                } else if (selectedOption.healthChange > 0) {
+                    resultMessage += `你的生命值增加了${selectedOption.healthChange}點。`;
+                }
+
+                if (selectedOption.coinsChange !== 0) {
+                    resultMessage += `你獲得了${selectedOption.coinsChange}金幣。`;
+                }
+
+                if (selectedOption.expChange !== 0) {
+                    resultMessage += `你的經驗值增加了${selectedOption.expChange}點。`;
+                }
+
+                addToChatLog(message + resultMessage);
+                updateStatus();
+
+                // 等待一段時間後繼續遊戲循環
+                setTimeout(gameLoop, 1000);
+            } else {
+                endGame();
+            }
+        }
+
+        // 更新遊戲狀態
+        function updateStatus() {
+            playerHealthSpan.textContent = playerHealth;
+            playerCoinsSpan.textContent = playerCoins;
+            playerExpSpan.textContent = playerExp;
+        }
+
+        // 遊戲結束
+        function endGame() {
+            addToChatLog('遊戲結束！');
+            playerNameInput.disabled = false;
+            gameOptionsDiv.style.display = 'none';
+
+            // 更新排行榜
+            updateLeaderboard();
+        }
+
+        // 新增訊息至遊戲進程中
+        function addToChatLog(message) {
+            chatBox.innerHTML += `<p>${message}</p>`;
+        }
+        // 更新排行榜
+        function updateLeaderboard() {
+            // 建立一個新的玩家資訊
+            const playerInfo = {
+                name: playerNameInput.value,
+                exp: playerExp,
+                coins: playerCoins,
+            };
+
+            // 加入玩家資訊到排行榜中
+            leaderboard.push(playerInfo);
+
+            // 根據經驗值排序排行榜，並只保留前五名
+            leaderboard.sort((a, b) => b.exp - a.exp);
+            leaderboard = leaderboard.slice(0, 5);
+
+            // 顯示最高經驗值和最高金幣數量
+            const highestExpList = document.getElementById('highest-exp-list');
+            const highestCoinsList = document.getElementById('highest-coins-list');
+
+            highestExpList.innerHTML = leaderboard.map(player => `<li>${player.name}：${player.exp}經驗值</li>`).join('');
+            highestCoinsList.innerHTML = leaderboard.map(player => `<li>${player.name}：${player.coins}金幣</li>`).join('');
+
+            // 將排行榜儲存到本地
+            localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
+        }
+
+        // 清除排行榜
+        function clearLeaderboard() {
+            leaderboard = [];
+            localStorage.removeItem('leaderboard');
+
+            const highestExpList = document.getElementById('highest-exp-list');
+            const highestCoinsList = document.getElementById('highest-coins-list');
+            highestExpList.innerHTML = '';
+            highestCoinsList.innerHTML = '';
+        }
+
+        // 頁面載入時從本地儲存讀取排行榜
+        window.onload = function () {
+            const storedLeaderboard = localStorage.getItem('leaderboard');
+            if (storedLeaderboard) {
+                leaderboard = JSON.parse(storedLeaderboard);
+                updateLeaderboard();
+            }
+        };
+    </script>
+</body>
+</html>
